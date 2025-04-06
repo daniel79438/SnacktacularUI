@@ -10,11 +10,19 @@ import Firebase
 import FirebaseAuth
 
 struct LoginView: View {
-    //state variables to get the user entered information
+    enum Field { //Cases to be created for focus to go between
+        case email, password
+    }
+    
+    //State variables to get the user entered information
     @State private var email = ""
     @State private var password = ""
     @State private var showingAlert = false
     @State private var alertMessage = ""
+    @State private var buttonDisabled = true
+    @FocusState private var focusField: Field? //Used to set and move the focus(which field the cursor is associated to)
+    
+    
     var body: some View {
         VStack {
             Image("logo")
@@ -26,9 +34,27 @@ struct LoginView: View {
                     .keyboardType(.emailAddress) // Email friendly keyboard
                     .textInputAutocapitalization(.never)
                     .submitLabel(.next) //changes return button on keyboard to next
+                    .focused($focusField, equals: .email) //email focus
+                //When submit button is pressed change focus
+                    .onSubmit {
+                        focusField = .password
+                    }
+                //runs enabledButtons function everytime a new character is entered into email / password field
+                    .onChange(of: email) {
+                        enabledButtons()
+                    }
                 
                 SecureField("password", text: $password) //hides the passowrd and disables copy/paste
                     .submitLabel(.done) //changes return button on keyboard to done
+                    .focused($focusField, equals: .password) //password focus
+                //When submit button is pressed, the keyboard is dismissed
+                    .onSubmit {
+                        focusField = nil
+                    }
+                //runs enabledButtons function everytime a new character is entered into email / password field
+                    .onChange(of: email) {
+                        enabledButtons()
+                    }
             }
             .textFieldStyle(.roundedBorder)
             .overlay {
@@ -51,6 +77,7 @@ struct LoginView: View {
             .tint(.snack) //custom color from Assets
             .font(.title2)
             .padding(.top)
+            .disabled(buttonDisabled)
             
         }
         .padding()
@@ -59,6 +86,12 @@ struct LoginView: View {
         
             }
         }
+    }
+    //Function to check whether the buttons should be disabled or not
+    func enabledButtons() {
+        let emailIsGood = email.count > 6 && email.contains("@")
+        let passwordIsGood = password.count > 6
+        buttonDisabled = !(emailIsGood && passwordIsGood)
     }
     
     func register() { //signup user
@@ -74,8 +107,6 @@ struct LoginView: View {
             }
         }
     }
-    
-    
     
     func login() { //login user
         Auth.auth().signIn(withEmail: email, password: password) { result, error in
