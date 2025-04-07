@@ -20,6 +20,7 @@ struct LoginView: View {
     @State private var showingAlert = false
     @State private var alertMessage = ""
     @State private var buttonDisabled = true
+    @State private var presentSheet = false //Similar to a login screen but it takes up the whole screen
     @FocusState private var focusField: Field? //Used to set and move the focus(which field the cursor is associated to)
     
     
@@ -32,6 +33,7 @@ struct LoginView: View {
             Group {
                 TextField("email", text: $email)
                     .keyboardType(.emailAddress) // Email friendly keyboard
+                    .autocorrectionDisabled()
                     .textInputAutocapitalization(.never)
                     .submitLabel(.next) //changes return button on keyboard to next
                     .focused($focusField, equals: .email) //email focus
@@ -45,6 +47,7 @@ struct LoginView: View {
                     }
                 
                 SecureField("password", text: $password) //hides the passowrd and disables copy/paste
+                    .textInputAutocapitalization(.never)
                     .submitLabel(.done) //changes return button on keyboard to done
                     .focused($focusField, equals: .password) //password focus
                 //When submit button is pressed, the keyboard is dismissed
@@ -52,7 +55,7 @@ struct LoginView: View {
                         focusField = nil
                     }
                 //runs enabledButtons function everytime a new character is entered into email / password field
-                    .onChange(of: email) {
+                    .onChange(of: password) {
                         enabledButtons()
                     }
             }
@@ -61,6 +64,7 @@ struct LoginView: View {
                 RoundedRectangle(cornerRadius: 5)
                     .stroke(.gray.opacity(0.5), lineWidth: 2)
             }
+            .padding(.horizontal)
             
             HStack {
                 Button("Sign Up") {
@@ -85,6 +89,16 @@ struct LoginView: View {
             Button("OK", role: .cancel) { //button if the error appears
         
             }
+            .onAppear() { //checks if a user is logged in
+                if Auth.auth().currentUser != nil { // If we're logged in...
+                    print("🪵 Login success!")
+                    presentSheet = true
+                }
+            }
+            //shows the login sheet
+            .fullScreenCover(isPresented: $presentSheet) {
+                ListView()
+            }
         }
     }
     //Function to check whether the buttons should be disabled or not
@@ -103,7 +117,7 @@ struct LoginView: View {
                 showingAlert = true
             } else {
                 print("😎 Registration success!")
-                //TODO: Load ListView
+                presentSheet = true
             }
         }
     }
@@ -117,11 +131,10 @@ struct LoginView: View {
                 showingAlert = true
             } else {
                 print("🪵 Login success!")
-                //TODO: Load ListView
+                presentSheet = true
             }
         }
     }
-    
 }
 
 #Preview {
