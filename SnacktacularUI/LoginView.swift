@@ -85,10 +85,10 @@ struct LoginView: View {
             
         }
         .padding()
-        .alert(alertMessage, isPresented: $showingAlert) {
-            Button("OK", role: .cancel) { //button if the error appears
         
-            }
+        .alert(alertMessage, isPresented: $showingAlert) {
+            Button("OK", role: .cancel) { } //button if the error appears
+        }
             .onAppear() { //checks if a user is logged in
                 if Auth.auth().currentUser != nil { // If we're logged in...
                     print("🪵 Login success!")
@@ -98,7 +98,7 @@ struct LoginView: View {
             //shows the login sheet
             .fullScreenCover(isPresented: $presentSheet) {
                 ListView()
-            }
+        
         }
     }
     //Function to check whether the buttons should be disabled or not
