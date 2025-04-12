@@ -16,7 +16,7 @@ class Photo: Identifiable, Codable {
     var reviewer: String = Auth.auth().currentUser?.email ?? ""
     var postedOn = Date() //Current Date / Time
     
-    init(id: String? = nil, imageURLString: String = "", description: String = "", reviewer: String = "", postedOn: Date = Date()) {
+    init(id: String? = nil, imageURLString: String = "", description: String = "", reviewer: String = (Auth.auth().currentUser?.email ?? ""), postedOn: Date = Date()) {
         self.id = id
         self.imageURLString = imageURLString
         self.description = description
